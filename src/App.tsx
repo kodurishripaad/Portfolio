@@ -1,3 +1,5 @@
+import { useState } from "react";
+import { AnimatePresence } from "motion/react";
 import Header from "./components/Header";
 import Hero from "./components/Hero";
 import VideoSection from "./components/VideoSection";
@@ -7,8 +9,11 @@ import FeaturedSystems from "./components/FeaturedSystems";
 import Story from "./components/Story";
 import Contact from "./components/Contact";
 import Footer from "./components/Footer";
+import VideoModal from "./components/VideoModal";
 
 export default function App() {
+  const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
+
   return (
     <div className="min-h-screen bg-[#03020D] text-white overflow-x-hidden font-sans relative">
       {/* Premium Centered Floating Glassmorphism Navbar */}
@@ -16,8 +21,8 @@ export default function App() {
 
       {/* Main Sections Content Layer */}
       <main className="relative z-10">
-        <Hero />
-        <VideoSection />
+        <Hero onOpenVideoModal={() => setIsVideoModalOpen(true)} />
+        <VideoSection onOpenVideoModal={() => setIsVideoModalOpen(true)} />
 
         <Works />
         <FeaturedSystems />
@@ -32,6 +37,13 @@ export default function App() {
 
       {/* Footer */}
       <Footer />
+
+      {/* Premium walkthrough placeholder modal */}
+      <AnimatePresence>
+        {isVideoModalOpen && (
+          <VideoModal isOpen={isVideoModalOpen} onClose={() => setIsVideoModalOpen(false)} />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

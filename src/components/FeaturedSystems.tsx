@@ -1,5 +1,72 @@
 import { motion } from "motion/react";
+import { useEffect, useState, useRef } from "react";
 import SplitText from "./SplitText";
+import { Check, Sparkles, Cpu } from "lucide-react";
+
+interface CountUpProps {
+  end: number;
+  duration?: number;
+  decimals?: number;
+  prefix?: string;
+  suffix?: string;
+}
+
+function CountUp({ end, duration = 1.5, decimals = 0, prefix = "", suffix = "" }: CountUpProps) {
+  const [count, setCount] = useState(0);
+  const elementRef = useRef<HTMLSpanElement>(null);
+  const hasAnimated = useRef(false);
+
+  useEffect(() => {
+    if (typeof IntersectionObserver === "undefined") {
+      setCount(end);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        if (entry.isIntersecting && !hasAnimated.current) {
+          hasAnimated.current = true;
+          let startTimestamp: number | null = null;
+          const step = (timestamp: number) => {
+            if (!startTimestamp) startTimestamp = timestamp;
+            const progress = Math.min((timestamp - startTimestamp) / (duration * 1000), 1);
+            // Easing function: easeOutQuad
+            const easeProgress = progress * (2 - progress);
+            setCount(easeProgress * end);
+            if (progress < 1) {
+              window.requestAnimationFrame(step);
+            } else {
+              setCount(end);
+            }
+          };
+          window.requestAnimationFrame(step);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    const currentElem = elementRef.current;
+    if (currentElem) {
+      observer.observe(currentElem);
+    }
+
+    return () => {
+      if (currentElem) {
+        observer.unobserve(currentElem);
+      }
+      observer.disconnect();
+    };
+  }, [end, duration]);
+
+  return (
+    <span ref={elementRef}>
+      {prefix}
+      {count.toFixed(decimals)}
+      {suffix}
+    </span>
+  );
+}
 
 // Vector Screen 1: Email Lead Qualification & Follow-Up System
 const CRM_PIPELINE_SVG = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="100%" height="100%" style="background-color:%23080718; font-family:'Inter', system-ui, sans-serif;">
@@ -96,13 +163,15 @@ const VOICE_AGENT_SVG = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2
   <rect x="390" y="25" width="385" height="450" rx="12" fill="%230E0D25" stroke="%231F1D3D" stroke-width="1" />
   <text x="410" y="55" fill="%2394A3B8" font-size="11" font-weight="800" letter-spacing="1">LIVE CONVERSATION TRANSCRIPT</text>
   
-  <path d="M 410,85 h 250 r 6,0 0,6 v 40 r 0,6 -6,0 h -250 r -6,0 0,-6 v -40 r 0,-6 6,0 Z" fill="%2314132F" stroke="%2322214E" stroke-width="1" />
-  <text x="420" y="105" fill="%238C8EFF" font-size="10" font-weight="bold">Caller [Inbound Customer]</text>
-  <text x="420" y="122" fill="%23FFF" font-size="11">"Hi, I'd like to book an appointment for tomorrow afternoon."</text>
+  <path d="M 410,85 h 320 rx 6 ry 6 v 55 rx -6 ry -6 h -320 rx -6 ry -6 v -55 rx 6 ry 6 Z" fill="%2314132F" stroke="%2322214E" stroke-width="1" />
+  <text x="420" y="103" fill="%238C8EFF" font-size="10" font-weight="bold">Caller [Inbound Customer]</text>
+  <text x="420" y="118" fill="%23FFF" font-size="11">"Hi, I'd like to book an appointment</text>
+  <text x="420" y="133" fill="%23FFF" font-size="11">for tomorrow afternoon."</text>
   
-  <path d="M 505,155 h 250 r 6,0 0,6 v 45 r 0,6 -6,0 h -250 r -6,0 0,-6 v -45 r 0,-6 6,0 Z" fill="%231B1944" stroke="%235F62FF" stroke-width="1" />
-  <text x="515" y="175" fill="%238C8EFF" font-size="10" font-weight="bold">AI Virtual Receptionist</text>
-  <text x="515" y="192" fill="%23FFF" font-size="11">"Certainly! I have 3:30 PM open. May I get your name?"</text>
+  <path d="M 440,155 h 310 rx 6 ry 6 v 55 rx -6 ry -6 h -310 rx -6 ry -6 v -55 rx 6 ry 6 Z" fill="%231B1944" stroke="%235F62FF" stroke-width="1" />
+  <text x="450" y="173" fill="%238C8EFF" font-size="10" font-weight="bold">AI Virtual Receptionist</text>
+  <text x="450" y="188" fill="%23FFF" font-size="11">"Certainly! I have 3:30 PM open.</text>
+  <text x="450" y="203" fill="%23FFF" font-size="11">May I get your name?"</text>
 
   <rect x="410" y="235" width="345" height="215" rx="8" fill="%2311102A" stroke="%2325244C" stroke-width="1" />
   <text x="425" y="260" fill="%23FFF" font-size="13" font-weight="700">VOICE PERFORMANCE ANALYTICS</text>
@@ -236,159 +305,374 @@ const WHATSAPP_AUTOMATION_SVG = `data:image/svg+xml;utf8,<svg xmlns="http://www.
   <text x="375" y="52" fill="%23FFF" font-size="12" font-weight="bold">Automated WhatsApp Receptionist</text>
   <text x="375" y="66" fill="%2334D399" font-size="9" font-weight="600">Online &amp; Instant</text>
 
-  <path d="M 335,110 h 200 r 6,0 0,6 v 45 r 0,6 -6,0 h -200 r -6,0 0,-6 v -45 r 0,-6 6,0 Z" fill="%23262D31" />
-  <text x="345" y="130" fill="%23ECEFF1" font-size="11">"Hi, I saw your advertisement. Are you guys currently available for real estate booking?"</text>
-  <text x="525" y="152" fill="%2390A4AE" font-size="8" text-anchor="end">14:02</text>
+  <path d="M 335,100 h 330 rx 6 ry 6 v 58 rx -6 ry -6 h -330 rx -6 ry -6 v -58 rx 6 ry 6 Z" fill="%23262D31" />
+  <text x="345" y="118" fill="%23ECEFF1" font-size="11">"Hi, I saw your ad. Are you guys currently</text>
+  <text x="345" y="133" fill="%23ECEFF1" font-size="11">available for real estate booking?"</text>
+  <text x="655" y="150" fill="%2390A4AE" font-size="8" text-anchor="end">14:02</text>
 
-  <path d="M 525,180 h 200 r 6,0 0,6 v 85 r 0,6 -6,0 h -200 r -6,0 0,-6 v -85 r 0,-6 6,0 Z" fill="%23056162" />
-  <text x="535" y="200" fill="%23FFF" font-size="11" font-weight="600">Smart Automation Bot</text>
-  <text x="535" y="217" fill="%23E0F2F1" font-size="11">"Hi there! Yes we are! 📅 Here are available real estate consultation spots today:"</text>
-  <text x="535" y="234" fill="%23E0F2F1" font-size="11">"1. 2:00 PM"</text>
-  <text x="535" y="251" fill="%23E0F2F1" font-size="11">"2. 4:30 PM"</text>
-  <text x="535" y="268" fill="%2390A4AE" font-size="8">14:02 - Auto Response</text>
+  <path d="M 400,170 h 350 rx 6 ry 6 v 98 rx -6 ry -6 h -350 rx -6 ry -6 v -98 rx 6 ry 6 Z" fill="%23056162" />
+  <text x="410" y="188" fill="%23FFF" font-size="11" font-weight="600">Smart Automation Bot</text>
+  <text x="410" y="204" fill="%23E0F2F1" font-size="11">"Hi there! Yes we are! 📅 Here are available"</text>
+  <text x="410" y="219" fill="%23E0F2F1" font-size="11">"consultation spots today: 1. 2:00 PM | 2. 4:30 PM"</text>
+  <text x="740" y="258" fill="%2390A4AE" font-size="8" text-anchor="end">14:02 - Auto Response</text>
 
-  <path d="M 335,295 h 50 r 6,0 0,6 v 25 r 0,6 -6,0 h -50 r -6,0 0,-6 v -25 r 0,-6 6,0 Z" fill="%23262D31" />
-  <text x="345" y="315" fill="%23ECEFF1" font-size="11">"1"</text>
-  <text x="375" y="322" fill="%2390A4AE" font-size="8" text-anchor="end">14:03</text>
+  <path d="M 335,282 h 65 rx 6 ry 6 v 35 rx -6 ry -6 h -65 rx -6 ry -6 v -35 rx 6 ry 6 Z" fill="%23262D31" />
+  <text x="345" y="303" fill="%23ECEFF1" font-size="11">"1"</text>
+  <text x="390" y="309" fill="%2390A4AE" font-size="8" text-anchor="end">14:03</text>
 
-  <path d="M 505,340 h 240 r 6,0 0,6 v 65 r 0,6 -6,0 h -240 r -6,0 0,-6 v -65 r 0,-6 6,0 Z" fill="%23056162" />
-  <text x="515" y="360" fill="%23FFF" font-size="11" font-weight="600">Smart Automation Bot</text>
-  <text x="515" y="377" fill="%23E0F2F1" font-size="11">"Fantastic! You're booked for 2:00 PM today! I've sent confirmation to your email."</text>
-  <text x="515" y="394" fill="%23E0F2F1" font-size="11">"Talk soon!"</text>
-  <text x="515" y="411" fill="%2390A4AE" font-size="8">14:03 - Auto Response</text>
+  <path d="M 400,330 h 350 rx 6 ry 6 v 95 rx -6 ry -6 h -350 rx -6 ry -6 v -95 rx 6 ry 6 Z" fill="%23056162" />
+  <text x="410" y="348" fill="%23FFF" font-size="11" font-weight="600">Smart Automation Bot</text>
+  <text x="410" y="364" fill="%23E0F2F1" font-size="11">"Fantastic! You're booked for 2:00 PM today!"</text>
+  <text x="410" y="379" fill="%23E0F2F1" font-size="11">"I've sent confirmation to your email. Talk soon!"</text>
+  <text x="740" y="415" fill="%2390A4AE" font-size="8" text-anchor="end">14:03 - Auto Response</text>
 </svg>`;
 
 interface AutomationCard {
+  category: string;
   title: string;
+  outcome: string;
+  roiBadge: string;
+  points: string[];
   image: string;
-  description: string;
   tools: string[];
-  resultBadge: string;
 }
 
 export default function FeaturedSystems() {
-  const cards: AutomationCard[] = [
+  const stats = [
     {
-      title: "Email Lead Qualification & Follow-Up System",
+      renderValue: () => <CountUp end={50} suffix="+ hrs" />,
+      label: "Saved Weekly",
+      desc: "Per business workflow"
+    },
+    {
+      renderValue: () => (
+        <span className="inline-flex items-center">
+          <CountUp end={24} />
+          <span className="text-zinc-500 mx-0.5 font-light">/</span>
+          <CountUp end={7} />
+          <span className="text-zinc-500 mx-0.5 font-light">/</span>
+          <CountUp end={365} />
+        </span>
+      ),
+      label: "Automated Operations",
+      desc: "No offline hours"
+    },
+    {
+      renderValue: () => <CountUp end={99.9} decimals={1} suffix="%" />,
+      label: "System Reliability",
+      desc: "Zero missed triggers"
+    },
+    {
+      renderValue: () => <CountUp end={5} suffix=" Core" />,
+      label: "SaaS Integrations",
+      desc: "Unified workspace sync"
+    }
+  ];
+
+  const featuredVoiceSystem = {
+    category: "AI Voice Agent",
+    title: "AI Voice Receptionist System",
+    outcome: "An intelligent telephone representative that answers inquiries, qualifies potential prospects, and registers bookings with zero latency.",
+    roiBadge: "24/7 Customer Support",
+    points: [
+      "Handles infinite concurrent call queues with sub-second response lag",
+      "Asks logical qualifier questions & updates CRM records instantly",
+      "Secures customer consultation spots directly onto Google Calendar"
+    ],
+    image: VOICE_AGENT_SVG,
+    tools: ["Vapi", "OpenAI", "Google Calendar"],
+  };
+
+  const secondarySystems: AutomationCard[] = [
+    {
+      category: "Lead Automation",
+      title: "Lead Qualification & Booking",
+      outcome: "Intercept active leads, analyze fit parameters, and lock scheduling immediately without human delay.",
+      roiBadge: "+72% Response Speed",
+      points: [
+        "Responds to web inquiry forms in under 30 seconds",
+        "Scores and registers demographic data instantly",
+        "Books qualified discovery calls onto sales sheets"
+      ],
       image: CRM_PIPELINE_SVG,
-      description: "Automatically captures, qualifies, and follows up with leads without manual intervention.",
-      tools: ["n8n", "OpenAI", "Google Sheets", "Gmail"],
-      resultBadge: "Never Miss A Lead",
+      tools: ["n8n", "OpenAI", "Google Sheets", "Gmail"]
     },
     {
-      title: "AI Voice Receptionist System",
-      image: VOICE_AGENT_SVG,
-      description: "Answers incoming calls, gathers customer information, and handles appointment inquiries automatically.",
-      tools: ["Vapi", "OpenAI", "Google Calendar"],
-      resultBadge: "24/7 Call Handling",
-    },
-    {
-      title: "Invoice Automation System",
-      image: INVOICE_SOFTWARE_SVG,
-      description: "Automatically generates and delivers invoices while reducing repetitive administrative work.",
-      tools: ["n8n", "Gmail", "Google Sheets"],
-      resultBadge: "Faster Payments",
-    },
-    {
-      title: "WhatsApp Automation System For Businesses",
+      category: "WhatsApp Automation",
+      title: "WhatsApp Interactive Receptionist",
+      outcome: "Nurture cold advertisement leads directly inside the world's most popular messaging medium.",
+      roiBadge: "3x Faster Follow-Ups",
+      points: [
+        "Initiates proactive instant replies to click-to-chat ads",
+        "Guides users through interactive product discovery",
+        "Pre-populates contact profiles in client HubSpot/ActiveCampaign"
+      ],
       image: WHATSAPP_AUTOMATION_SVG,
-      description: "Automates customer conversations, lead responses, and follow-up communication.",
-      tools: ["n8n", "WhatsApp", "OpenAI", "Google Sheets"],
-      resultBadge: "Instant Customer Response",
+      tools: ["n8n", "WhatsApp", "OpenAI", "Google Sheets"]
     },
+    {
+      category: "Invoice Automation",
+      title: "Automated Billing & Reconciliation",
+      outcome: "Eliminate administrative back-office friction by automating invoice dispatching and contract checking.",
+      roiBadge: "15 Hours Saved Weekly",
+      points: [
+        "Tracks contract signatures or active payment triggers",
+        "Generates elegant PDF ledgers & dispatches them automatically",
+        "Reconciles inbound bank transfers with real-time feedback"
+      ],
+      image: INVOICE_SOFTWARE_SVG,
+      tools: ["n8n", "Gmail", "Google Sheets"]
+    }
   ];
 
   return (
     <section
       id="featured-systems"
-      className="relative w-full overflow-hidden py-24 bg-[#03020D]/40 border-t border-b border-white/5"
+      className="relative w-full overflow-hidden py-24 bg-[#03020D]/60 border-t border-b border-white/5"
     >
-      {/* Dynamic Background Glow Layer to harmonize deep dark design - Optimized blurs for mobile graphics performance */}
-      <div className="absolute inset-y-0 left-1/4 -z-10 h-[500px] w-full max-w-5xl bg-gradient-to-tr from-violet-900/10 via-[#5F62FF]/10 to-indigo-900/5 blur-[60px] lg:blur-[150px] rounded-full pointer-events-none" />
-      <div className="absolute top-[40%] right-10 -z-10 h-[350px] w-full max-w-2xl bg-[#5F62FF]/5 blur-[50px] lg:blur-[120px] rounded-full pointer-events-none" />
+      {/* Inline styling to hide scrollbars cleanly on Chrome, Safari, and other engines */}
+      <style>{`
+        .scrollbar-none::-webkit-scrollbar {
+          display: none;
+        }
+        .scrollbar-none {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+      `}</style>
+
+      {/* Luxury Ambient Lighting Layer */}
+      <div className="absolute top-[10%] left-1/4 -z-10 h-[500px] w-[500px] bg-gradient-to-tr from-violet-900/10 via-[#5F62FF]/10 to-indigo-900/5 blur-[120px] rounded-full pointer-events-none" />
+      <div className="absolute bottom-[20%] right-10 -z-10 h-[400px] w-[400px] bg-[#8B5CF6]/5 blur-[100px] rounded-full pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-6">
         
-        {/* Section Headline & Pitch */}
+        {/* Section Headline & Pitch - Upgraded to outcome-driven SaaS agency style */}
         <div className="text-center max-w-3xl mx-auto space-y-4 mb-16">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#5F62FF]/10 border border-[#5F62FF]/20 shadow-[0_0_15px_rgba(95,98,255,0.1)]">
+            <Cpu className="h-3.5 w-3.5 text-[#8C8EFF]" />
+            <span className="font-mono text-[10px] font-bold text-[#8C8EFF] uppercase tracking-wider">
+              Battle-Tested Systems
+            </span>
+          </div>
           <SplitText
-            text="Featured Automation Systems"
+            text="Automation Systems That Replace Repetitive Work"
             tag="h2"
             splitType="words"
-            delay={45}
-            duration={0.9}
+            delay={35}
+            duration={0.8}
             ease="power3.out"
-            from={{ opacity: 0, y: 30 }}
+            from={{ opacity: 0, y: 25 }}
             to={{ opacity: 1, y: 0 }}
             textAlign="center"
             className="text-3xl sm:text-4xl lg:text-[44px] font-semibold text-white tracking-[-0.04em] font-sans leading-tight"
           />
           <p className="text-zinc-400 text-sm sm:text-base leading-relaxed font-body max-w-2xl mx-auto">
-            Real automation systems built to eliminate repetitive work and simplify daily operations.
+            Real-world automation solutions built to save time, reduce costs, and scale operations.
           </p>
         </div>
 
-        {/* 2x2 Showcase Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
-          {cards.map((card, idx) => (
+        {/* Section Statistics Row ABOVE Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-5xl mx-auto mb-20">
+          {stats.map((stat, idx) => (
             <motion.div
               key={idx}
-              initial={{ opacity: 0, y: 35 }}
+              initial={{ opacity: 0, y: 15 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 0.7, delay: idx * 0.1, ease: [0.16, 1, 0.3, 1] }}
-              whileHover={{ y: -4 }}
-              className="group relative flex flex-col justify-between overflow-hidden rounded-2xl bg-[#090818]/90 border border-white/5 hover:border-[#5F62FF]/40 transition-colors duration-500 p-4 md:p-5 w-full max-w-[580px] mx-auto shadow-2xl shadow-indigo-950/40"
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: idx * 0.08 }}
+              className="relative p-5 rounded-2xl bg-[#080718]/40 border border-white/[0.04] backdrop-blur-md hover:border-white/[0.08] transition-all duration-300 shadow-[0_10px_30px_rgba(0,0,0,0.3)] group overflow-hidden"
             >
-              <div className="space-y-4">
-                
-                {/* Header of the Display Card: Title & Outcome Badge */}
-                <div className="flex items-start justify-between gap-4">
-                  <h3 className="text-base md:text-lg font-semibold text-white tracking-tight leading-snug group-hover:text-[#8082FF] transition-colors duration-300">
-                    {card.title}
+              {/* Subtle accent hover indicator line */}
+              <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-[#5F62FF] to-[#8B5CF6] scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
+              
+              <div className="text-2xl sm:text-3xl font-bold bg-gradient-to-br from-white via-white to-zinc-400 bg-clip-text text-transparent font-sans tracking-tight">
+                {stat.renderValue()}
+              </div>
+              <div className="text-zinc-300 font-semibold text-xs mt-1 sm:mt-1.5 flex items-center gap-1">
+                <span>{stat.label}</span>
+              </div>
+              <div className="text-zinc-500 text-[10px] sm:text-xs mt-1 font-body">
+                {stat.desc}
+              </div>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Primary Large Featured System Card (AI Voice Receptionist) */}
+        <div className="max-w-6xl mx-auto mb-16">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            className="group relative overflow-hidden rounded-3xl bg-gradient-to-b from-[#11102A]/85 to-[#090818]/85 border border-white/10 hover:border-[#5F62FF]/40 shadow-[0_20px_50px_rgba(0,0,0,0.5)] shadow-indigo-950/20 hover:shadow-[0_0_50px_rgba(95,98,255,0.25)] transition-all duration-500 p-6 sm:p-8 lg:p-10"
+          >
+            {/* Top corner luxury badge */}
+            <div className="absolute top-0 right-0 z-20">
+              <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-bl-3xl bg-gradient-to-l from-[#5F62FF] to-[#8B5CF6] text-white font-mono text-[9px] font-extrabold tracking-widest uppercase select-none shadow-[0_0_15px_rgba(95,98,255,0.2)]">
+                <Sparkles className="h-3 w-3 inline" /> MOST REQUESTED
+              </span>
+            </div>
+
+            {/* Content Splitting Grid (60% text content / 40% graphic mockup ratio) */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center relative z-10">
+              {/* Product Info Block (60%) */}
+              <div className="lg:col-span-7 space-y-5 text-left">
+                <div className="space-y-2">
+                  <span className="text-[10px] sm:text-xs font-mono font-bold tracking-widest text-[#8C8EFF] uppercase block">
+                    {featuredVoiceSystem.category}
+                  </span>
+                  <h3 className="text-2xl sm:text-3xl font-bold text-white tracking-tight leading-tight group-hover:text-white transition-colors duration-300 font-sans">
+                    {featuredVoiceSystem.title}
                   </h3>
-                  <span className="shrink-0 text-[10px] font-medium tracking-wide uppercase px-2.5 py-1 rounded-full bg-[#5F62FF]/10 text-[#8C8EFF] border border-[#5F62FF]/20 select-none">
-                    {card.resultBadge}
+                </div>
+                <p className="text-zinc-300 text-xs sm:text-sm md:text-base leading-relaxed font-body">
+                  {featuredVoiceSystem.outcome}
+                </p>
+
+                {/* Measurable ROI Result Flag */}
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-mono text-[10px] sm:text-xs font-bold shadow-[0_0_12px_rgba(16,185,129,0.15)] select-none">
+                  <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                  <span>Result: 24/7 Customer Support</span>
+                </div>
+
+                {/* Custom Checkbox outcome metrics bullet lists */}
+                <div className="space-y-3 pt-2">
+                  {featuredVoiceSystem.points.map((point, pIdx) => (
+                    <div key={pIdx} className="flex items-start gap-2.5">
+                      <span className="shrink-0 h-5 w-5 rounded-full bg-[#5F62FF]/10 border border-[#5F62FF]/20 flex items-center justify-center text-emerald-400 mt-0.5">
+                        <Check className="h-3 w-3" />
+                      </span>
+                      <span className="text-zinc-300 text-xs sm:text-sm font-body">
+                        {point}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Technology custom badges */}
+                <div className="pt-4 border-t border-white/[0.06] flex flex-wrap gap-2 items-center">
+                  <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest mr-1">
+                    Powered By:
+                  </span>
+                  {featuredVoiceSystem.tools.map((tool, tIdx) => (
+                    <span
+                      key={tIdx}
+                      className="text-[10px] font-mono text-white bg-white/[0.03] px-2.5 py-1 rounded-md border border-white/[0.08]"
+                    >
+                      {tool}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Graphic Mockup Block (40%) */}
+              <div className="lg:col-span-5 relative w-full overflow-hidden rounded-2xl border border-white/[0.08] bg-[#080718] select-none shadow-[0_15px_35px_rgba(0,0,0,0.6)]">
+                {/* Visual grid / cyber styling overlay */}
+                <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
+                <div className="absolute inset-0 z-10 bg-[radial-gradient(circle_at_center,rgba(95,98,255,0.08)_0%,transparent_70%)] pointer-events-none" />
+                
+                <div className="relative aspect-[4/3] w-full">
+                  <motion.img
+                    src={featuredVoiceSystem.image}
+                    alt={featuredVoiceSystem.title}
+                    referrerPolicy="no-referrer"
+                    className="h-full w-full object-contain p-4 origin-center transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.03]"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Extra purple back glow reflecting on hover container */}
+            <div className="absolute -bottom-10 -right-10 -z-10 h-40 w-40 bg-[#5F62FF]/0 group-hover:bg-[#5F62FF]/8 blur-[60px] rounded-full transition-all duration-700 pointer-events-none" />
+          </motion.div>
+        </div>
+
+        {/* Secondary Showcase Cards Grid */}
+        {/* Responsive vertical stack on mobile/tablet, standard grid layout on desktop */}
+        <div 
+          className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto px-4 md:px-0"
+        >
+          {secondarySystems.map((card, idx) => (
+            <motion.div
+              key={idx}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.7, delay: idx * 0.1, ease: [0.16, 1, 0.3, 1] }}
+              className="group relative flex flex-col justify-between overflow-hidden rounded-2xl bg-[#090818]/75 border border-white/5 hover:border-[#5F62FF]/30 hover:shadow-[0_0_35px_rgba(95,98,255,0.15)] shadow-xl transition-all duration-500 p-4 sm:p-5 md:p-6 w-full"
+            >
+              {/* Top 60% content column */}
+              <div className="space-y-4">
+                <div className="space-y-1 text-left">
+                  <span className="text-[9px] sm:text-[10px] font-mono font-bold tracking-widest text-[#8C8EFF] uppercase block">
+                    {card.category}
+                  </span>
+                  <h4 className="text-base sm:text-lg font-bold text-white tracking-tight leading-snug group-hover:text-white transition-colors duration-300 font-sans">
+                    {card.title}
+                  </h4>
+                </div>
+
+                {/* Outcome description paragraph */}
+                <p className="text-zinc-400 text-xs leading-relaxed font-body text-left">
+                  {card.outcome}
+                </p>
+
+                {/* Action / ROI Result metric badge */}
+                <div className="flex text-left">
+                  <span className={`text-[10px] font-semibold tracking-wide px-3 py-1 rounded-full border bg-[#5F62FF]/5 border-[#5F62FF]/15 text-[#8C8EFF] select-none`}>
+                    {card.roiBadge}
                   </span>
                 </div>
 
-                {/* Main Showcase Image (Takes up 75-80% height of the card focus, zoomed inside screen) */}
-                <div className="relative aspect-[16/10] sm:aspect-[1.5] w-full overflow-hidden rounded-xl border border-white/[0.05] bg-black select-none">
-                  {/* Subtle vignette/gradient overlays to add tech atmosphere */}
-                  <div className="absolute inset-0 z-10 bg-gradient-to-t from-[#020108]/40 via-transparent to-transparent pointer-events-none" />
-                  <div className="absolute inset-0 z-10 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.15)_50%),linear-gradient(90deg,rgba(95,98,255,0.02),rgba(255,255,255,0.01),rgba(95,98,255,0.02))] bg-[size:100%_4px,3px_100%] opacity-25 pointer-events-none" opacity-30 />
+                {/* Checkmarked benefits summary */}
+                <div className="space-y-2 pt-1 text-left">
+                  {card.points.map((point, pIdx) => (
+                    <div key={pIdx} className="flex items-start gap-2">
+                      <span className="shrink-0 h-4.5 w-4.5 rounded-full bg-[#5F62FF]/5 border border-[#5F62FF]/15 flex items-center justify-center text-emerald-400 mt-0.5">
+                        <Check className="h-2.5 w-2.5" />
+                      </span>
+                      <span className="text-zinc-300 text-xs font-body">
+                        {point}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
 
+              {/* Bottom 40% screenshot column */}
+              <div className="space-y-4 mt-6">
+                {/* Visual Graphic Device Screen */}
+                <div className="relative aspect-[16/10] w-full overflow-hidden rounded-xl border border-white/[0.04] bg-[#070614] select-none p-2 flex items-center justify-center shadow-inner">
+                  {/* Digital atmospheric shine */}
+                  <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
                   <motion.img
                     src={card.image}
                     alt={card.title}
                     referrerPolicy="no-referrer"
-                    className="h-full w-full object-cover object-center origin-center transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.03]"
+                    className="h-full w-full object-contain origin-center transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.03]"
                   />
                 </div>
 
-                {/* Description Text (Constrained to max 2 lines, crisp summary) */}
-                <p className="text-zinc-400 text-xs sm:text-sm leading-relaxed font-body line-clamp-2">
-                  {card.description}
-                </p>
-              </div>
-
-              {/* Tools row (highly minimal premium badges with subtle borders) */}
-              <div className="mt-4 pt-3.5 border-t border-white/[0.04] flex flex-wrap gap-1.5 items-center">
-                <span className="text-[10px] font-mono text-zinc-500 uppercase mr-1 tracking-wider">
-                  Engineered With:
-                </span>
-                {card.tools.map((tool, tIdx) => (
-                  <span
-                    key={tIdx}
-                    className="text-[10px] font-mono text-zinc-300 bg-white/[0.02] px-2 py-0.5 rounded border border-white/[0.05]"
-                  >
-                    {tool}
+                {/* Built-with tools container */}
+                <div className="pt-3 border-t border-white/[0.03] flex flex-wrap gap-1 items-center justify-start">
+                  <span className="text-[9px] font-mono text-zinc-500 uppercase tracking-widest mr-1">
+                    Built With:
                   </span>
-                ))}
+                  {card.tools.map((tool, tIdx) => (
+                    <span
+                      key={tIdx}
+                      className="text-[9px] font-mono text-zinc-300 bg-white/[0.02] px-2 py-0.5 rounded border border-white/[0.05]"
+                    >
+                      {tool}
+                    </span>
+                  ))}
+                </div>
               </div>
 
-              {/* Delicate back glow reflecting hover state */}
-              <div className="absolute bottom-[-20px] right-[-20px] -z-10 h-28 w-28 bg-[#5F62FF]/0 group-hover:bg-[#5F62FF]/5 blur-[40px] rounded-full transition-all duration-700 pointer-events-none" />
+              {/* Delicate highlight back-glow glow */}
+              <div className="absolute bottom-[-20px] right-[-20px] -z-10 h-24 w-24 bg-[#5F62FF]/0 group-hover:bg-[#5F62FF]/4 blur-[30px] rounded-full transition-all duration-700 pointer-events-none" />
             </motion.div>
           ))}
         </div>

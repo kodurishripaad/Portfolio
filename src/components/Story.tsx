@@ -47,7 +47,7 @@ export default function Story() {
               
               <img
                 src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=300&auto=format&fit=crop"
-                alt="Koduri Shripad"
+                alt="Koduri Shripaad"
                 referrerPolicy="no-referrer"
                 className="relative w-full h-full rounded-full object-cover border border-white/20"
               />
@@ -55,7 +55,7 @@ export default function Story() {
 
             {/* Profile Info */}
             <h3 className="text-xl md:text-2xl font-bold text-white tracking-tight leading-none mb-1.5 font-sans">
-              Koduri Shripad
+              Koduri Shripaad
             </h3>
             <span className="text-[11px] font-mono text-[#8C8EFF] uppercase tracking-widest font-bold mb-4 block">
               Business Automation Consultant
@@ -91,7 +91,7 @@ export default function Story() {
                 viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: 0.1 }}
               >
-                I believe business owners should spend their time growing their company, not chasing leads, replying to repetitive messages, updating spreadsheets, or manually booking appointments.
+                Modern businesses shouldn't rely on repetitive manual processes to operate effectively. Valuable time is often spent managing leads, responding to inquiries, scheduling appointments, and handling routine administrative work.
               </motion.p>
               
               <motion.p
@@ -101,7 +101,7 @@ export default function Story() {
                 transition={{ duration: 0.6, delay: 0.2 }}
                 className="text-zinc-400"
               >
-                My goal is simple: build reliable systems that remove repetitive work so businesses can operate faster, respond quicker, and focus on growth.
+                I build intelligent automation systems that simplify operations, improve response times, and create scalable workflows. By reducing manual effort, businesses can increase productivity, deliver a better customer experience, and focus on sustainable growth.
               </motion.p>
             </div>
 

@@ -4,7 +4,11 @@ import { ArrowUpRight, Play } from "lucide-react";
 import MagicRings from "./MagicRings";
 import SplitText from "./SplitText";
 
-export default function Hero() {
+interface HeroProps {
+  onOpenVideoModal: () => void;
+}
+
+export default function Hero({ onOpenVideoModal }: HeroProps) {
   const [isMobile, setIsMobile] = useState(false);
   const [isTablet, setIsTablet] = useState(false);
 
@@ -153,15 +157,14 @@ export default function Hero() {
             <span>Get In Touch</span>
             <ArrowUpRight className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
           </a>
-          <a
+          <button
             id="hero-cta-see-how-it-works"
-            href="#video-section"
-            onClick={(e) => handleNavClick(e, "video-section")}
-            className="inline-flex items-center justify-center gap-2 px-3.5 xs:px-4 sm:px-8 py-2.5 sm:py-3.5 text-[10px] sm:text-xs font-semibold rounded-full btn-secondary-white whitespace-nowrap"
+            onClick={onOpenVideoModal}
+            className="inline-flex items-center justify-center gap-2 px-3.5 xs:px-4 sm:px-8 py-2.5 sm:py-3.5 text-[10px] sm:text-xs font-semibold rounded-full btn-secondary-white whitespace-nowrap cursor-pointer"
           >
             <Play className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-zinc-400 fill-zinc-400/10" />
             <span>See How It Works</span>
-          </a>
+          </button>
         </motion.div>
 
       </div>

@@ -38,13 +38,13 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
         
         {/* Logo and title aligned with the Navbar */}
-        <div className="flex items-center gap-2 text-left">
+        <div className="flex items-center gap-2 justify-center md:justify-start text-center md:text-left">
           <div className="flex h-6 w-6 items-center justify-center rounded-md bg-[#5F62FF] text-white select-none shadow-[0_0_12px_rgba(95,98,255,0.3)]">
             <Sparkles className="h-3.5 w-3.5" />
           </div>
-          <div>
+          <div className="text-left">
             <span className="font-sans text-sm font-semibold text-white tracking-widest uppercase block leading-none select-none">
-              KODURI SHRIPAD
+              KODURI SHRIPAAD
             </span>
             <span className="font-mono text-[9px] font-bold text-zinc-500 block tracking-wider mt-1 uppercase leading-none select-none">
               Automation Consulting
@@ -53,8 +53,8 @@ export default function Footer() {
         </div>
 
         {/* Small Copyright label */}
-        <p className="font-mono text-[10px] text-zinc-500 font-semibold tracking-wide order-last md:order-none">
-          © {currentYear} • Koduri Shripad • Built with extreme precision. All Rights Reserved.
+        <p className="font-mono text-[10px] text-zinc-500 font-semibold tracking-wide order-last md:order-none text-center md:text-left max-w-sm md:max-w-none px-4 md:px-0">
+          © {currentYear} • Koduri Shripaad • Built with extreme precision. All Rights Reserved.
         </p>
 
         {/* Small Icon Bar */}

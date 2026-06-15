@@ -75,7 +75,7 @@ export default function Header() {
             <div className="flex h-6 w-6 items-center justify-center rounded-md bg-[#5F62FF] text-white shadow-[0_0_12px_rgba(95,98,255,0.3)]">
               <Sparkles className="h-3.5 w-3.5" />
             </div>
-            <span>KODURI SHRIPAD</span>
+            <span>KODURI SHRIPAAD</span>
           </a>
 
           {/* Centered Desktop Menu */}
